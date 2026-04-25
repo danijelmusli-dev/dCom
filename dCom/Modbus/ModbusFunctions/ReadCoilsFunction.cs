@@ -62,32 +62,19 @@ namespace Modbus.ModbusFunctions
 
             var param = (ModbusReadCommandParameters)CommandParameters;
 
-            int byteCount      = response[8];
-            int remaining      = param.Quantity;
-            ushort currentAddr = param.StartAddress;
+            int byteCount = response[8];
+            int quantity = param.Quantity;
+            ushort startAddress = param.StartAddress;
 
-            int byteIndex = 0;
-            while ((byteIndex < byteCount) && (remaining > 0))
-            { 
-                byte currentByte = response[byteIndex + 9];
-
-                int bitIndex = 0;
-                while ((bitIndex < 8) && (remaining > 0))
+            for (int i = 0; i < byteCount && quantity > 0; i++)
+            {
+                var data = response[9 + i];
+                for (int j = 0; j < 8 && quantity > 0; j++, quantity--)
                 {
-                    ushort bitValue = (ushort)(currentByte & 0x01);
-
-                    var key = new Tuple<PointType, ushort>(
-                        PointType.DIGITAL_OUTPUT, currentAddr);
-
-                    map[key] = bitValue;
-
-                    currentByte >>= 1;
-                    currentAddr++;
-
-                    bitIndex++;
-                    remaining--;
+                    var value = (ushort)(data & 1);
+                    map.Add(new Tuple<PointType, ushort>(PointType.DIGITAL_OUTPUT, startAddress++), value);
+                    data >>= 1;
                 }
-
             }
 
             return map;

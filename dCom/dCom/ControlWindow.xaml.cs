@@ -18,5 +18,5 @@ namespace dCom
 			this.DataContext = dataContext;
 			Title = string.Format("Control Window - {0}", dataContext.Name);
 		}
-	}
+    }
 }
